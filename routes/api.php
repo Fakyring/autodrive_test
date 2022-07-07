@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SalonController;
-use App\Http\Controllers\CitiesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +27,9 @@ Route::get('salon/stock-price', [ApiController::class, 'getSalonMaxPrice']);
 Route::get('model/color-stats', [ApiController::class, 'getModelColorCount']);
 Route::get('salon/stock-stats-order', [ApiController::class, 'getSalonOrdered']);
 
-//Salons CRUD
-Route::get('salon/{id}', [SalonController::class, 'readSalon']);
-Route::post('salon/add', [SalonController::class, 'createSalon']);
-Route::put('salon/{id}', [SalonController::class, 'updateSalon']);
-Route::delete('salon/{id}', [SalonController::class, 'deleteSalon']);
-
+//PHP Tasks
+Route::get('city/{id}/salon', [SalonController::class, 'salonsCity']);
+Route::get('city/{cid}/salon/{sid}', [SalonController::class, 'salonsCityInfo']);
+Route::post('city/{id}/salon', [SalonController::class, 'addSalon']);
+Route::put('city/{cid}/salon/{sid}', [SalonController::class, 'updateSalon']);
+Route::delete('city/{cid}/salon/{sid}', [SalonController::class, 'deleteSalon']);

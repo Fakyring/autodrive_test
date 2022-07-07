@@ -8,56 +8,72 @@ use App\Models\CitiesModel;
 
 class SalonController extends Controller
 {
-    function readSalon($id)
+    function salonsCity($id)
     {
-        $salon = SalonsModel::where('id', $id)->get();
-        if ($salon[0]->status == 0)
-            return response()->json(['status' => 'Данный салон не работает'], 200);
+        $salon = SalonsModel::select('id', 'name')->where('city_id', $id)->get();
+        $citiesCheck = CitiesModel::where('id', $id)->get();
+        if ($citiesCheck->count() == 0)
+            return response()->json(['status' => 'Данный город не найден'], 404);
         if ($salon->count() == 0)
-            return response()->json(['status' => 'Данный салон не найден'], 404);
+            return response()->json(['status' => 'В данном городе нет салонов'], 404);
         return response()->json($salon, 200);
     }
 
-    function createSalon(Request $request)
+    function salonsCityInfo($cid, $sid)
     {
+        $salon = SalonsModel::select('id', 'name')->where('city_id', $cid)->where('id', $sid)->get();
+        $city = CitiesModel::where('id', $cid)->get();
+        if ($city->count() == 0)
+            return response()->json(['status' => 'Данный город не найден'], 404);
+        if ($salon->count() == 0)
+            return response()->json(['status' => 'Данный салон не найден'], 404);
+        $salon[0]->city = array('id' => $city[0]->id, 'name' => $city[0]->name);
+        return response()->json($salon, 200);
+    }
+
+    function addSalon($id, Request $request)
+    {
+        $citiesCheck = CitiesModel::where('id', $id)->get();
         $salon = new SalonsModel;
+        if ($citiesCheck->count() == 0)
+            return response()->json(['status' => 'Данный город не найден'], 404);
+        if ($request->name == '')
+            return response()->json(['status' => 'Необходимо дать название салону'], 400);
         if ($salon->where('name', $request->name)->get()->count() == '1')
             return response()->json(['status' => 'Салон с таким названием уже существует'], 409);
         $salon->name = $request->name;
-        $salon->city_id = $request->city_id;
-        $salon->status = $request->status;
+        $salon->city_id = $id;
         $salon->save();
-        return response()->json(['id' => $salon->id], 201);
+        return response()->json($salon, 201);
     }
 
-    function updateSalon(Request $request)
+    function updateSalon($cid, $sid, Request $request)
     {
-        $salon = SalonsModel::where('id', $request->id)->get()->first();
+        $citiesCheck = CitiesModel::where('id', $cid)->get();
+        if ($citiesCheck->count() == 0)
+            return response()->json(['status' => 'Данный город не найден'], 404);
+        $salon = SalonsModel::where('city_id', $cid)->where('id', $sid)->get();
         $salonCheck = SalonsModel::where('name', $request->name)->get();
-        if ($salon->count() == 0) {
+        if ($salon->count() == 0)
             return response()->json(['status' => 'Данный салон не найден'], 404);
-        }
-        if ($salonCheck[0]->id != $request->id && $salonCheck->count() != 0 && $request->name == $salonCheck[0]->name) {
-            return response()->json(['status' => 'Салон с таким названием уже существует'], 409);
-        }
-        if ($request->name == '') {
+        if ($request->name == '')
             return response()->json(['status' => 'Необходимо дать название салону'], 400);
-        }
-        if ($salon->count() != 0) {
-            $salon->update($request->all());
-        }
+        if ($salonCheck->count() != 0 && $salonCheck[0]->id != $sid && $request->name == $salonCheck[0]->name)
+            return response()->json(['status' => 'Салон с таким названием уже существует'], 409);
+        $salon[0]->update($request->all());
         return response()->json($salon, 200);
     }
 
-    function deleteSalon($id)
-    {
-        $salon = SalonsModel::where('id', $id)->get()[0];
-        if ($salon->count() == 0) {
+    function deleteSalon($cid, $sid){
+        $citiesCheck = CitiesModel::where('id', $cid)->get();
+        if ($citiesCheck->count() == 0)
+            return response()->json(['status' => 'Данный город не найден'], 404);
+        $salon = SalonsModel::where('city_id', $cid)->where('id', $sid)->get();
+        if ($salon->count() == 0)
             return response()->json(['status' => 'Данный салон не найден'], 404);
-        }
-        if ($salon->status == 0)
+        if ($salon[0]->status == 0)
             return response()->json(['status' => 'Данный салон уже удалён'], 410);
-        $salon->update(['status' => 0]);
+        $salon[0]->update(['status' => 0]);
         return response()->json($salon, 200);
     }
 }
