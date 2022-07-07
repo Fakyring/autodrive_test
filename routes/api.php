@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SalonController;
+use App\Http\Controllers\CitiesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,3 +33,4 @@ Route::get('salon/{id}', [SalonController::class, 'readSalon']);
 Route::post('salon/add', [SalonController::class, 'createSalon']);
 Route::put('salon/{id}', [SalonController::class, 'updateSalon']);
 Route::delete('salon/{id}', [SalonController::class, 'deleteSalon']);
+
